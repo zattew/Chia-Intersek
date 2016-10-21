@@ -1,4 +1,7 @@
 # Chia-Intersek
+
+To compile just digit: make compila
+
 Program for mapping Chia-Pets data on a genome. That will take three arguments in input in this order: 
 1 genome with 5 colums, name of gene, chromosome, strand, start Tss, end Tss, second gene name.
 2 left anchor with 3 columns: chromosome, start coordinate, end coordinate.
