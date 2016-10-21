@@ -1,4 +1,6 @@
 #include "prototipi.h"
+#include <cstdlib>
+
 
 //Prototipi
 
@@ -10,6 +12,16 @@
 
 // leggi_tss(file, NM, crom, start, gene, &dim )
 
+
+static void show_usage( string arg)
+{
+	cerr << "Usage: " << "Usage: ./main.x crom_coord ancora_left ancora_right\n"      	
+	                  << "Opzioni:\n"
+		          << "\t-h,--help\t\tMostra le opzioni\n"
+		          << "\t-i\t\t\tSetta l'intorno default ( -i 1000 )"
+		          << endl;
+	exit(0);
+}
 
 int main(int argc, char** argv )
 {
@@ -23,6 +35,7 @@ int main(int argc, char** argv )
 	//setto l'intorno
 	
 	int intorno = 1000;
+	int num = 0;
 
 	//Variabili per la lettura del primo file
 
@@ -36,12 +49,56 @@ int main(int argc, char** argv )
 	string linea_right = "";
 
 	ofstream risultati("Risultati.txt");
+	
 
-	if ( argc != 4 )
-	{	
-		cout<<"Usage: ./main.x crom_coord ancora_left ancora_right"<<endl;      	
-		return 1;
+	if ( argc < 4 )
+	{
+		for ( int i = 1; i <= argc; i++)
+		{	
+			string arg = argv[i];
+			if ( arg == "-h" || arg == "--help")
+			{
+				show_usage(arg);
+			}
+			else
+			{
+				show_usage(arg);
+			}
+		}
 	}
+
+	else if ( argc != 4 )
+	{		
+		int controllo = 0;
+		
+		for ( int i = 1; i <= argc; i++)
+		{	
+			string arg = argv[i];
+			
+			if ( arg == "-i" )
+			{
+				num = atoi(argv[i+1] );
+				controllo = 1;
+				break;
+			}
+		}
+
+		if ( controllo == 0) 	
+		{
+			cout<<"For help: -h\n";
+			exit(0);
+		}
+	}
+
+	
+	//setto il nuovo valore dell'intorno
+	if ( num != 0 )
+	{
+		int num1 = num;
+		intorno = num1;
+	}
+
+	cout<<"intorno settato a: "<<intorno<<endl;
 
 
 	vector <string> NM;
@@ -165,7 +222,6 @@ int main(int argc, char** argv )
 	right.clear();
 	right.close();
 
-	//Decommenta questo comando sotto se vuoi vedere Nome gene e numero dell'ancora caduta sul gene
 	system("rm geni_ancore_left.txt geni_ancore_right.txt");
 
 	//unisco in un ultimo vettore tutte le ancore e i rispettivi punteggi;
