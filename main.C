@@ -165,7 +165,8 @@ int main(int argc, char** argv )
 	right.clear();
 	right.close();
 
-	//system("rm geni_ancore_left.txt geni_ancore_right.txt");
+	//Decommenta questo comando sotto se vuoi vedere Nome gene e numero dell'ancora caduta sul gene
+	system("rm geni_ancore_left.txt geni_ancore_right.txt");
 
 	//unisco in un ultimo vettore tutte le ancore e i rispettivi punteggi;
 	
