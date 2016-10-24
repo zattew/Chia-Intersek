@@ -1,5 +1,5 @@
 #include "prototipi.h"
-#include <cstdlib>
+#include <stdlib.h>
 
 
 //Prototipi
@@ -13,12 +13,13 @@
 // leggi_tss(file, NM, crom, start, gene, &dim )
 
 
-static void show_usage( string arg)
+static void show_usage(  )
 {
 	cerr << "Usage: " << "Usage: ./main.x crom_coord ancora_left ancora_right\n"      	
 	                  << "Opzioni:\n"
 		          << "\t-h,--help\t\tMostra le opzioni\n"
-		          << "\t-i\t\t\tSetta l'intorno default ( -i 1000 )"
+		          << "\t-i\t\t\tSetta l'intorno default ( -i 1000 )\n"
+		          << "\t-sox\t\t\tUtilizzo di ancore Sox stampa solo enhancer in cui cade Sox2\n"
 		          << endl;
 	exit(0);
 }
@@ -30,12 +31,18 @@ int main(int argc, char** argv )
 	system("figlet 'Chia Intersek' ");
 	cout<<endl<<endl;
 
+	//Utilizzo di Sox quindi non eseguo il normale programma;
+	
+	
+	int risposta = 0;
+	
 	int i = 0;
 	
 	//setto l'intorno
 	
 	int intorno = 1000;
-	int num = 0;
+	char *p;
+	long int num = 0;
 
 	//Variabili per la lettura del primo file
 
@@ -50,53 +57,67 @@ int main(int argc, char** argv )
 
 	ofstream risultati("Risultati.txt");
 	
+	
+	//dichiarazione di arg;
+	string arg = "";
 
 	if ( argc < 4 )
 	{
-		for ( int i = 1; i <= argc; i++)
-		{	
-			string arg = argv[i];
+		for ( int i = 1; i < argc; i++)
+		{
+			arg = argv[i];
+
 			if ( arg == "-h" || arg == "--help")
 			{
-				show_usage(arg);
+				show_usage();
 			}
 			else
 			{
-				show_usage(arg);
+				show_usage();
 			}
 		}
 	}
 
-	else if ( argc != 4 )
+	else if ( argc > 4 )
 	{		
 		int controllo = 0;
 		
-		for ( int i = 1; i <= argc; i++)
+		for ( int i = 1; i < argc; i++)
 		{	
-			string arg = argv[i];
-			
+			arg = argv[i];
+
 			if ( arg == "-i" )
 			{
-				num = atoi(argv[i+1] );
+				intorno = strtol( argv[i+1], &p, 10 );
 				controllo = 1;
-				break;
 			}
+
+			if ( arg == "-sox" )
+			{
+				risposta = 1;
+				controllo = 1;
+			}
+
 		}
 
 		if ( controllo == 0) 	
 		{
-			cout<<"For help: -h\n";
-			exit(0);
+			show_usage();
 		}
 	}
 
 	
+
+	if ( risposta == 1 )
+		cout<<"Hai selezionato Sox2, verranno stampati geni e enhancer con Sox2 associati"<<endl;
+
+
 	//setto il nuovo valore dell'intorno
 	if ( num != 0 )
 	{
-		int num1 = num;
-		intorno = num1;
+		intorno = num;
 	}
+	
 
 	cout<<"intorno settato a: "<<intorno<<endl;
 
@@ -118,10 +139,10 @@ int main(int argc, char** argv )
 
 	//Variabili per la lettura del secondo file
 
-	vector <string> crom_left;
+	vector <string> S_left,crom_left;
 	vector <int> start_left, end_left;
 	
-	vector <string> crom_right;
+	vector <string> S_right,crom_right;
 	vector <int> start_right, end_right;
 
 	//lettura ancore
@@ -129,9 +150,20 @@ int main(int argc, char** argv )
 	int tot_ancore_left = 0;
 	int tot_ancore_right = 0;
 
-	leggi_ancore(ancora_left, crom_left, start_left, end_left, &tot_ancore_left ); 
-	leggi_ancore(ancora_right, crom_right, start_right, end_right, &tot_ancore_right );
-
+	if ( risposta != 1 )
+	{
+		leggi_ancore(ancora_left, crom_left, start_left, end_left, &tot_ancore_left ); 
+		leggi_ancore(ancora_right, crom_right, start_right, end_right, &tot_ancore_right );
+	}
+	
+	if ( risposta == 1 )
+	{
+		leggi_ancore_sox2(ancora_left,S_left, crom_left, start_left, end_left, &tot_ancore_left ); 
+		leggi_ancore_sox2(ancora_right,S_right, crom_right, start_right, end_right, &tot_ancore_right );
+	}
+	
+	
+	
 	//Incrocio delle ancore con il Tss in un intorno di mille
 
 	// l'idea è creare una mappa di vettori di coordinate
@@ -201,8 +233,17 @@ int main(int argc, char** argv )
 	
 	int uno = 1;
 
-	lettura_ancore( left, right,geni_ancore_left, prom_ass_left, enh_ass_left, mappa_left_dim, uno);
-	cout<<endl;
+	if ( risposta != 1 )
+	{
+		lettura_ancore( left, right,geni_ancore_left, prom_ass_left, enh_ass_left, mappa_left_dim, uno);
+		cout<<endl;
+	}
+
+	if ( risposta == 1 )
+	{
+		lettura_ancore_sox( left, right,geni_ancore_left, enh_ass_left, mappa_left_dim, uno, S_left);
+		cout<<endl;
+	}
 	
 	left.clear();
 	left.close();
@@ -213,10 +254,20 @@ int main(int argc, char** argv )
 	right.open("geni_ancore_right.txt");
 
 	uno++;
-
-	lettura_ancore( right, left,geni_ancore_right, prom_ass_right, enh_ass_right, mappa_right_dim, uno);
-	cout<<endl;
 	
+	if ( risposta != 1 )
+	{
+		lettura_ancore( right, left,geni_ancore_right, prom_ass_right, enh_ass_right, mappa_right_dim, uno);
+		cout<<endl;
+	}
+	
+	if ( risposta == 1 )
+	{
+		lettura_ancore_sox( right, left,geni_ancore_right, enh_ass_right, mappa_right_dim, uno, S_right);
+		cout<<endl;
+	}
+	
+
 	left.clear();
 	left.close();
 	right.clear();
@@ -242,62 +293,113 @@ int main(int argc, char** argv )
 
 	//vettori finali
 	
-	vector<int> prom_finali, enh_finali;
-
-	for ( i = 0; i < tutti_geni.size(); i++)
+	if ( risposta != 1 )
 	{
-		int final_prom = 0, final_enh = 0;
 
-		for (int j = 0; j < geni_ancore_left.size(); j++)
+		vector<int> prom_finali, enh_finali;
+
+		for ( i = 0; i < tutti_geni.size(); i++)
 		{
-			if ( tutti_geni[i] == geni_ancore_left[j] )
+			int final_prom = 0, final_enh = 0;
+
+			for (int j = 0; j < geni_ancore_left.size(); j++)
 			{
-				final_prom = prom_ass_left[j];
-				final_enh = enh_ass_left[j];
-				break;
-			}
-		}
-		
-		for (int j = 0; j < geni_ancore_right.size(); j++)
-		{
-			if ( tutti_geni[i] == geni_ancore_right[j] )
-			{
-				final_prom =final_prom + prom_ass_right[j];
-				final_enh = final_enh + enh_ass_right[j];
-			
-				//Se ci sono casi particolari devo sottrarre dal totale
-				for ( tt = ancore_sovrapposte.begin(); tt != ancore_sovrapposte.end(); tt++)
+				if ( tutti_geni[i] == geni_ancore_left[j] )
 				{
-					for ( int j = 0; j < tt->second.size(); j++)
-						if ( tutti_geni[i] == tt->second[j] )
-							final_prom = final_prom - (tt->second.size() * ( (tt->second.size() - 1)) - 1); 
+					final_prom = prom_ass_left[j];
+					final_enh = enh_ass_left[j];
+					break;
+				}
+			}
+		
+			for (int j = 0; j < geni_ancore_right.size(); j++)
+			{
+				if ( tutti_geni[i] == geni_ancore_right[j] )
+				{
+					final_prom =final_prom + prom_ass_right[j];
+					final_enh = final_enh + enh_ass_right[j];
+			
+					//Se ci sono casi particolari devo sottrarre dal totale
+					for ( tt = ancore_sovrapposte.begin(); tt != ancore_sovrapposte.end(); tt++)
+					{
+						for ( int j = 0; j < tt->second.size(); j++)
+							if ( tutti_geni[i] == tt->second[j] )
+								final_prom = final_prom - (tt->second.size() * ( (tt->second.size() - 1)) - 1); 
 							
 							// sottraggo il numero dei geni diviso due, corrispondente a second.size(), dopo moltiplico per il numero di interazioni che ha ogni gene considerando che quando un gene è uguale tra dx e sx  non ci sono interazioni. Quindi in un box di 2 * 2 le interazioni per gene sono 1 e ogni gene aggiunge 1 ai promotori, quindi basta sottrarre uno alla conta totale.Così via all'aumentare dei geni.
 				
-				}
+					}
 
-				break;
+					break;
+				}
 			}
+
+
+			prom_finali.push_back(final_prom);
+			enh_finali.push_back(final_enh);
+
+		}	
+
+
+		//stampa finale
+
+		risultati<<"Geni"<<"\t"<<"prom"<<"\t"<<"enh"<<endl;
+	
+		for ( i = 0; i < tutti_geni.size(); i++)
+			risultati<<tutti_geni[i]<<"\t"<<prom_finali[i]<<"\t"<<enh_finali[i]<<endl;
+
 		}
 
 
-		prom_finali.push_back(final_prom);
-		enh_finali.push_back(final_enh);
+		if ( risposta == 1 )
+		{
 
-	}
+		vector<int>  enh_finali;
+
+		for ( i = 0; i < tutti_geni.size(); i++)
+		{
+			int  final_enh = 0;
+
+			for (int j = 0; j < geni_ancore_left.size(); j++)
+			{
+				if ( tutti_geni[i] == geni_ancore_left[j] )
+				{
+					final_enh = enh_ass_left[j];
+					break;
+				}
+			}
+		
+			for (int j = 0; j < geni_ancore_right.size(); j++)
+			{
+				if ( tutti_geni[i] == geni_ancore_right[j] )
+				{
+					final_enh = final_enh + enh_ass_right[j];
+					break;
+				}
+			}
 
 
-	//stampa finale
+			enh_finali.push_back(final_enh);
+		}
 
-	risultati<<"Geni"<<"\t"<<"prom"<<"\t"<<"enh"<<endl;
+
+		//stampa finale
+
+		risultati<<"Geni"<<"\t"<<"enh"<<endl;
 	
-	for ( i = 0; i < tutti_geni.size(); i++)
-		risultati<<tutti_geni[i]<<"\t"<<prom_finali[i]<<"\t"<<enh_finali[i]<<endl;
+		for ( i = 0; i < tutti_geni.size(); i++)
+			risultati<<tutti_geni[i]<<"\t"<<enh_finali[i]<<endl;
+
+		}
+
+
+
 
 	cout<<endl<<endl;
 	cout<<termcolor::on_blue<<"risultati salvati nella cartella corrente in Risultati.txt"<<termcolor::reset<<endl;
 	
 	cout<<endl;
+
 
 	return 0;
 }
