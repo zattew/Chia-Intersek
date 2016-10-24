@@ -24,3 +24,5 @@ void pacman ( int ,int ) ;
 void cerca_ancore_uguali ( int, map < string, vector < int > >&, map < string, vector < int > >& );
 void mappa_ordinata ( map<string, vector<int> >&, map<string, vector<int> >&);
 void casi_particolari ( int , map <string, vector<int> >&, map <string, vector<int> >&, map <int, vector<string> >& );
+void leggi_ancore_sox2 ( ifstream& , vector<string>& ,vector<string>& , vector<int>& , vector<int>& , int * );
+void lettura_ancore_sox (ifstream&, ifstream& ,vector<string>&, vector<int>&, int , int , vector<string>& ) ;
