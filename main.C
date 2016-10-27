@@ -158,8 +158,8 @@ int main(int argc, char** argv )
 	
 	if ( risposta == 1 )
 	{
-		leggi_ancore_sox2(ancora_left,S_left, crom_left, start_left, end_left, &tot_ancore_left ); 
-		leggi_ancore_sox2(ancora_right,S_right, crom_right, start_right, end_right, &tot_ancore_right );
+		leggi_ancore_sox2(ancora_left,S_right, crom_left, start_left, end_left, &tot_ancore_left ); 
+		leggi_ancore_sox2(ancora_right,S_left, crom_right, start_right, end_right, &tot_ancore_right );
 	}
 	
 	
